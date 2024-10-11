@@ -50,7 +50,7 @@ public struct AIProxy {
         contentType: String? = nil,
         headers: [String: String] = [:]
     ) async throws -> URLRequest {
-        return try await AIProxyURLRequest.create(
+        return try await AIProxyURLRequest.createHTTP(
             partialKey: partialKey,
             serviceURL: serviceURL,
             clientID: clientID,
