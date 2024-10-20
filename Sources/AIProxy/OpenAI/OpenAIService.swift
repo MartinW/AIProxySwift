@@ -65,7 +65,7 @@ public final class OpenAIService {
         webSocketTask.resume()
         try await webSocketTask.send(webSocketMessage)
 
-        let thinger2 = OpenAIRealtimeConversationItemCreate(item: .init(role: "user", content: [.init(text: "tell me about science. Very briefly.")]))
+        let thinger2 = OpenAIRealtimeConversationItemCreate(item: .init(role: "user", content: [.init(text: "Tell me about science. Briefly.")]))
         let webSocketMessage2 = URLSessionWebSocketTask.Message.data(try thinger2.serialize())
         try await webSocketTask.send(webSocketMessage2)
 
@@ -84,14 +84,15 @@ public final class OpenAIService {
                 guard let json = deserialized as? [String: Any] else {
                     throw AIProxyError.assertion("Could not convert realtime response into generic dict")
                 }
-                print(json["type"] as? String)
+                //print(json["type"] as? String)
                 if (json["type"] as? String == "response.audio.delta") {
-                    print("TRYING TO PLAY")
 
                     let b64Str = json["delta"] as! String
                     playPCM16Audio(from: b64Str)
-                    print(b64Str)
-                    print("\n\n BREAK \n\n ")
+
+                     // AWW YEAH!, This code is so hacked up lol
+//                    print(b64Str)
+                    print("--")
                     //let theData = Data(base64Encoded: b64Str)!
 //                    playPCM16Audio(from: b64Str)
 //                    audioPlayer = try AVAudioPlayer(data: theData)
@@ -356,10 +357,10 @@ var playerNode : AVAudioPlayerNode? = nil
 
 
 func playPCM16Audio(from base64String: String) {
-    if (isPlaying) {
-        queue.append(base64String)
-        return
-    }
+//    if (isPlaying) {
+//        queue.append(base64String)
+//        return
+//    }
     _playPCM16Audio(from: base64String)
 }
 
@@ -439,7 +440,7 @@ func _playPCM16Audio(from base64String: String) {
         playerNode = AVAudioPlayerNode()
         audioEngine!.attach(playerNode!)
         // Connect playerNode to mainMixerNode with the buffer's format
-        audioEngine!.connect(playerNode!, to: audioEngine!.mainMixerNode, format: audioBuffer.format)
+        audioEngine!.connect(playerNode!, to: audioEngine!.outputNode, format: audioBuffer.format)
     }
 
     guard let audioEngine = audioEngine else {
@@ -463,6 +464,7 @@ func _playPCM16Audio(from base64String: String) {
     }
 
     // Schedule the buffer for playback
+    //print("Scheduling next")
     playerNode.scheduleBuffer(audioBuffer, at: nil, options: [], completionHandler: {
         // Stop the audio engine after playback finishes
         // playerNode.stop()
